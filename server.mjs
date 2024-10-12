@@ -1,4 +1,3 @@
-// Importar las librerías necesarias
 import { createServer } from 'http';
 import pkg from 'pg';
 import dotenv from 'dotenv';
@@ -8,25 +7,25 @@ dotenv.config();
 
 const { Client } = pkg;
 
-// Configuración del cliente de PostgreSQL
-const client = new Client({
-  user: 'postgres.cxpwmwmnmzgketvxrogb',          // Usuario de la base de datos
-  host: 'aws-0-us-west-1.pooler.supabase.com',           // Dirección del servidor PostgreSQL
-  database: 'postgres', // Nombre de la base de datos
-  password: '@Dvrspt_112233*',     // Contraseña del usuario
-  port: process.env.PORT,                  // Puerto por defecto de PostgreSQL
-});
-
 // Función para conectarse a la base de datos y hacer una consulta
 async function fetchFromDatabase() {
+  const client = new Client({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+  });
+
   try {
     await client.connect(); // Conexión a la base de datos
     const result = await client.query('SELECT NOW()'); // Ejemplo de consulta
-    await client.end(); // Cerrar conexión
     return result.rows[0]; // Retornar el resultado de la consulta
   } catch (err) {
     console.error('Error en la consulta a la base de datos:', err);
     return { error: 'Error en la base de datos' };
+  } finally {
+    await client.end(); // Cerrar conexión
   }
 }
 
@@ -44,5 +43,5 @@ createServer(async (req, res) => {
   }
   res.end();
 }).listen(process.env.PORT || 3000, () => {
-  console.log(`Servidor ejecutándose en el puerto ${process.env.PORT || 3000}`);
+  console.log(`Servidor ejecutándose en el puerto ${process.env.DB_PORT || 3000}`);
 });
